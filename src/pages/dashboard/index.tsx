@@ -5,8 +5,10 @@ import FinancialRecordList from "./financial-record-list";
 const Dashboard = () => {
   const { user } = useUser();
   return (
-    <div>
-      <h1>Welcome {user?.firstName}! Here are your Finances</h1>
+    <div className="">
+      <h1 className="text-3xl font-semibold mb-5">
+        Welcome {user?.firstName}! Here are your Finances
+      </h1>
       <FinancialRecordForm />
       <FinancialRecordList />
     </div>
