@@ -1,18 +1,19 @@
-import { createContext, useContext, useState } from "react";
-type FinancialRecord = {
-  id?: string;
+import { useUser } from "@clerk/clerk-react";
+import { createContext, useContext, useEffect, useState } from "react";
+export interface FinancialRecord {
+  _id?: string;
   userId: string;
   date: Date;
   description: string;
   amount: number;
   category: string;
   paymentMethod: string;
-};
+}
 
 type FinancialRecordContextType = {
   records: FinancialRecord[];
   addRecord: (record: FinancialRecord) => void;
-  // updateRecord: (id: string, newRecord: FinancialRecord) => void;
+  updateRecord: (id: string, newRecord: FinancialRecord) => void;
   // deleteRecord: (id: string) => void;
 };
 
@@ -26,6 +27,24 @@ export const FinancialRecordProvider = ({
   children: React.ReactNode;
 }) => {
   const [records, setRecords] = useState<FinancialRecord[]>([]);
+
+  const { user } = useUser();
+
+  const fetchRecords = async () => {
+    if (!user) return;
+    const res = await fetch(
+      `http://localhost:4000/financial-records/getAllByUserId/${user.id}`
+    );
+    if (res.ok) {
+      const records = await res.json();
+      console.log(records);
+      setRecords(records);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecords();
+  }, [user]);
 
   const addRecord = async (record: FinancialRecord) => {
     const res = await fetch("http://localhost:4000/financial-records", {
@@ -43,8 +62,38 @@ export const FinancialRecordProvider = ({
     } catch (error) {}
   };
 
+  const updateRecord = async (id: string, newRecord: FinancialRecord) => {
+    const response = await fetch(
+      `http://localhost:4000/financial-records/${id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(newRecord),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    try {
+      if (response.ok) {
+        const newRecord = await response.json();
+        setRecords((prev) =>
+          prev.map((record) => {
+            if (record._id === id) {
+              return newRecord;
+            } else {
+              return record;
+            }
+          })
+        );
+      }
+    } catch (err) {}
+  };
+
   return (
-    <FinancialRecordContext.Provider value={{ records, addRecord }}>
+    <FinancialRecordContext.Provider
+      value={{ records, addRecord, updateRecord }}
+    >
       {children}
     </FinancialRecordContext.Provider>
   );

@@ -1,6 +1,6 @@
 import { useUser } from "@clerk/clerk-react";
 import FinancialRecordForm from "./financial-record-form";
-import FinancialRecordList from "./financial-record-list";
+import { FinancialRecordList } from "./financial-record-list";
 
 const Dashboard = () => {
   const { user } = useUser();
