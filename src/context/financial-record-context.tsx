@@ -14,7 +14,7 @@ type FinancialRecordContextType = {
   records: FinancialRecord[];
   addRecord: (record: FinancialRecord) => void;
   updateRecord: (id: string, newRecord: FinancialRecord) => void;
-  // deleteRecord: (id: string) => void;
+  deleteRecord: (id: string) => void;
 };
 
 export const FinancialRecordContext = createContext<
@@ -90,9 +90,23 @@ export const FinancialRecordProvider = ({
     } catch (err) {}
   };
 
+  const deleteRecord = async (id: string) => {
+    const res = await fetch(`http://localhost:4000/financial-records/${id}`, {
+      method: "DELETE",
+    });
+    try {
+      if (res.ok) {
+        const deletedRecord = await res.json();
+        setRecords((prev) =>
+          prev.filter((record) => record._id !== deletedRecord._id)
+        );
+      }
+    } catch (error) {}
+  };
+
   return (
     <FinancialRecordContext.Provider
-      value={{ records, addRecord, updateRecord }}
+      value={{ records, addRecord, updateRecord, deleteRecord }}
     >
       {children}
     </FinancialRecordContext.Provider>
